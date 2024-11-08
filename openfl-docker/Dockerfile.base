@@ -15,12 +15,25 @@ RUN --mount=type=cache,id=apt-dev,target=/var/cache/apt \
     apt-get update && \
     apt-get install -y \
     git \
+    curl \
     python3-pip \
     python3.10-dev \
     ca-certificates \
     build-essential \
     --no-install-recommends && \
     apt-get purge -y linux-libc-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Gramine
+RUN --mount=type=cache,id=apt-dev,target=/var/cache/apt \
+    curl -fsSLo /usr/share/keyrings/gramine-keyring.gpg https://packages.gramineproject.io/gramine-keyring.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/gramine-keyring.gpg] https://packages.gramineproject.io/ jammy main" \
+    | tee /etc/apt/sources.list.d/gramine.list && \
+    curl -fsSLo /usr/share/keyrings/intel-sgx-deb.asc https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-sgx-deb.asc] https://download.01.org/intel-sgx/sgx_repo/ubuntu jammy main" \
+    | tee /etc/apt/sources.list.d/intel-sgx.list && \
+    apt-get update && \
+    apt-get install -y gramine --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 # Create an unprivileged user.
