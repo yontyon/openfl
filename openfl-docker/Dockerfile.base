@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 # ------------------------------------
-# OpenFL Base Image
+# OpenFL Base Image w/ Gramine support
 # $> docker build . -t openfl -f Dockerfile.base [--build-arg OPENFL_REVISION=GIT_URL@COMMIT_ID]
 # ------------------------------------
 FROM ubuntu:22.04 AS base
