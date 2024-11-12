@@ -390,6 +390,22 @@ def export_() -> str:
     help="If set, rebuilds docker images with `--no-cache` option.",
 )
 @option(
+    "--sgx-ready",
+    is_flag=True,
+    default=False,
+    help="If set, builds an SGX-enabled OpenFL enclave.",
+)
+@option(
+    "--enclave-key",
+    "enclave_key",
+    type=str,
+    required=False,
+    help=(
+        "Path to an enclave signing key. If not provided, a new key will be generated. "
+        "This option is only valid when `--sgx-ready` is set."
+    ),
+)
+@option(
     "--revision",
     required=False,
     default=None,
@@ -401,7 +417,9 @@ def export_() -> str:
     ),
 )
 @pass_context
-def dockerize_(context, save, rebuild, revision):
+def dockerize_(
+    context, save: bool, rebuild: bool, sgx_ready: bool, enclave_key: str, revision: str
+):
     """Package current workspace as a Docker image."""
 
     # Docker build options
@@ -430,10 +448,24 @@ def dockerize_(context, save, rebuild, revision):
     _execute(base_image_build_cmd)
 
     # Build workspace image.
+    options = []
+    options.append("--no-cache" if rebuild else "")
+    options = " ".join(options)
+    if enclave_key is None:
+        _execute("openssl genrsa -out key.pem -3 3072")
+        enclave_key = os.path.abspath("key.pem")
+        logging.info(f"Generated new enclave key: {enclave_key}")
+    else:
+        enclave_key = os.path.abspath(enclave_key)
+        if not os.path.exists(enclave_key):
+            raise FileNotFoundError(f"Enclave key `{enclave_key}` does not exist")
+        logging.info(f"Using enclave key: {enclave_key}")
+
     logging.info("Building workspace image")
     ws_image_build_cmd = (
         "DOCKER_BUILDKIT=1 docker build {options} "
         "--build-arg WORKSPACE_NAME={workspace_name} "
+        "--secret id=signer-key,src={enclave_key} "
         "-t {image_name} "
         "-f {dockerfile} "
         "{build_context}"
@@ -441,6 +473,7 @@ def dockerize_(context, save, rebuild, revision):
         options=options,
         image_name=workspace_name,
         workspace_name=workspace_name,
+        enclave_key=enclave_key,
         dockerfile=os.path.join(SITEPACKS, "openfl-docker", "Dockerfile.workspace"),
         build_context=".",
     )
