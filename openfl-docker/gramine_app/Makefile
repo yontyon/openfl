@@ -1,10 +1,8 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
+VENV_ROOT ?= /opt/venv
+WORKSPACE_ROOT ?= /workspace
 ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)
-
-# This is a signer key on the BUILDING machine
-SGX_SIGNER_KEY ?= /key.pem
 
 ifeq ($(DEBUG),1)
 GRAMINE_LOG_LEVEL = debug
@@ -20,14 +18,12 @@ endif
 
 fx.manifest: fx.manifest.template
 	@echo "Making fx.manifest file"
-# disable checks temp - until gramine is pegged to proper release
 	gramine-manifest \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
 		-Darch_libdir=$(ARCH_LIBDIR) \
-		-Dno_proxy=$(no_proxy) \
-		-Dhttp_proxy=$(http_proxy) \
-		-Dhttps_proxy=$(https_proxy) \
-		-Dentrypoint=$(shell which fx) \
+		-Dvenv_root=$(VENV_ROOT) \
+		-Dentrypoint=$(VENV_ROOT)/bin/fx \
+		-Dworkspace_root=$(WORKSPACE_ROOT) \
 		$< >$@
 
 fx.manifest.sgx: fx.manifest

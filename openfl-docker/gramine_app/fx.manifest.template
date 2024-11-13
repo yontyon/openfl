@@ -5,30 +5,25 @@
 # ==================================
 
 libos.entrypoint = "{{ entrypoint }}"
-loader.entrypoint.uri = "file:{{ gramine.libos }}"
-
+loader.entrypoint = "file:{{ gramine.libos }}"
 loader.log_level = "{{ log_level }}"
-
-loader.env.OMP_NUM_THREADS = "16"
-loader.env.LD_LIBRARY_PATH = "{{ arch_libdir }}:/usr/{{ arch_libdir }}:/lib:/usr/lib"
-loader.env.SSL_CERT_DIR = "/etc/ssl/certs"
-# loader.env.no_proxy = "{{ no_proxy }}"
-# loader.env.https_proxy = "{{ https_proxy }}"
-# loader.env.http_proxy = "{{ http_proxy }}"
 
 loader.insecure__use_cmdline_argv = true
 loader.insecure__use_host_env = true
 
+loader.env.LD_LIBRARY_PATH = "{{ venv_root }}:{{ arch_libdir }}:/usr/{{ arch_libdir }}:/lib:/usr/lib"
+loader.env.SSL_CERT_DIR = "/etc/ssl/certs"
 
 # URI - path on host
 # PATH - pointer inside gramine
-fs.start_dir = "/workspace"
+fs.start_dir = "{{ workspace_root }}"
 fs.mounts = [
   { uri = "file:{{ gramine.runtimedir() }}", path = "/lib" },
   { uri = "file:{{ arch_libdir }}", path = "{{ arch_libdir }}" },
   { uri = "file:/usr", path = "/usr" },
   { uri = "file:/etc/ssl/certs", path = "/etc/ssl/certs" },
-  { uri = "file:/workspace", path = "/workspace" },
+  { uri = "file:{{ workspace_root }}", path = "{{ workspace_root }}" },
+  { uri = "file:{{ venv_root }}", path = "{{ venv_root }}" },
   { type = "tmpfs", path = "/tmp" },
 ]
 
@@ -53,18 +48,18 @@ sgx.trusted_files = [
 {% for path in python.get_sys_path('python') %}
   "file:{{ path }}{{ '/' if path.is_dir() else '' }}",
 {% endfor %}
-  "file:/workspace/src/",
+  "file:{{ venv_root }}/",
+  "file:{{ workspace_root }}/src/",
 ]
 
 sgx.allowed_files = [
-  "file:/workspace/save",
-  "file:/workspace/plan/",
-  "file:/workspace/logs",
-  "file:/workspace/cert",
-  "file:/workspace/data",
-  "file:/workspace/plan/cols.yaml",
-  "file:/workspace/plan/data.yaml",
-  "file:/workspace/plan/plan.yaml",
+  "file:{{ workspace_root }}/save",
+  "file:{{ workspace_root }}/logs",
+  "file:{{ workspace_root }}/cert",
+  "file:{{ workspace_root }}/data",
+  "file:{{ workspace_root }}/plan/cols.yaml",
+  "file:{{ workspace_root }}/plan/data.yaml",
+  "file:{{ workspace_root }}/plan/plan.yaml",
 ]
 sgx.remote_attestation = "dcap"
 sgx.max_threads = 512
