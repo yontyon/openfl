@@ -240,7 +240,7 @@ def fx_federation(request, pytestconfig):
         f"\tNumber of collaborators: {num_collaborators}\n"
         f"\tNumber of rounds: {num_rounds}\n"
         f"\tModel name: {model_name}\n"
-        f"\tClient authentication: {disable_client_auth}\n"
+        f"\tClient authentication: {not disable_client_auth}\n"
         f"\tTLS: {not disable_tls}"
     )
 
