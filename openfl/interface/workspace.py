@@ -394,7 +394,11 @@ def export_() -> str:
     "enclave_key",
     type=str,
     required=False,
-    help="Path to an enclave signing key. If not provided, a new key will be generated. ",
+    help=(
+        "Path to an enclave signing key. If not provided, a key will be auto-generated in the workspace. "
+        "Note that this command builds a TEE-ready image, key is NOT packaged along with the image. "
+        "You have the flexibility to not run inside a TEE later."
+    ),
 )
 @option(
     "--revision",
@@ -409,7 +413,7 @@ def export_() -> str:
 )
 @pass_context
 def dockerize_(context, save: bool, rebuild: bool, enclave_key: str, revision: str):
-    """Package current workspace as a Docker image."""
+    """Package current workspace as a TEE-ready Docker image."""
 
     # Docker build options
     options = []
