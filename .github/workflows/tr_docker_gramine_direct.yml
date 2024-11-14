@@ -1,5 +1,5 @@
 # Tests an FL experiment in a Dockerized environment.
-name: Task Runner API (Docker/gramine-direct)
+name: TaskRunner (docker/gramine-direct)
 
 on:
   pull_request:
