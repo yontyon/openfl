@@ -2,7 +2,7 @@
 # Workflow to run Task Runner end to end tests with non TLS client auth
 # Authors - Noopur, Payal Chaurasiya
 #---------------------------------------------------------------------------
-name: Task Runner E2E With Non-TLS Client Auth
+name: Task Runner E2E W/o mTLS
 
 on:
   workflow_dispatch:
