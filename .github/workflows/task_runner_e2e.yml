@@ -68,16 +68,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install .
           pip install -r test-requirements.txt
+          echo ${{ matrix.tls }}
 
       - name: Run Task Runner E2E tests
-        if: ${{ matrix.tls == 'true' }}
+        if: matrix.tls == 'true'
         id: run_task_runner_tests_tls
         run: |
           python -m pytest -s tests/end_to_end/test_suites/task_runner_tests.py -m ${{ env.MODEL_NAME }} --num_rounds $NUM_ROUNDS --num_collaborators $NUM_COLLABORATORS --model_name ${{ env.MODEL_NAME }}
           echo "Task runner end to end test run completed"
 
       - name: Run Task Runner E2E tests without TLS
-        if: ${{ matrix.tls == 'false' }}
+        if: matrix.tls == 'false'
         id: run_task_runner_tests_non_tls
         run: |
           python -m pytest -s tests/end_to_end/test_suites/task_runner_tests.py -m ${{ env.MODEL_NAME }} --num_rounds $NUM_ROUNDS --num_collaborators $NUM_COLLABORATORS --model_name ${{ env.MODEL_NAME }} --disable_tls
