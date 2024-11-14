@@ -190,27 +190,31 @@ class ModelOwner:
             bool: True if successful, else False
         """
         self.cols_path = os.path.join(self.workspace_path, "plan", "cols.yaml")
-        log.info(f"Registering the collaborators in {self.cols_path}")
-        # Open the file and modify the entries
+        log.info(f"Registering the collaborators..")
         self.num_collaborators = num_collaborators if num_collaborators else self.num_collaborators
 
-        # Straightforward writing to the yaml file is not recommended here
-        # As the file might contain spaces and tabs which can cause issues
-        with open(self.cols_path, "r", encoding="utf-8") as f:
-            doc = yaml.load(f, Loader=yaml.FullLoader)
+        try:
+            # Straightforward writing to the yaml file is not recommended here
+            # As the file might contain spaces and tabs which can cause issues
+            with open(self.cols_path, "r", encoding="utf-8") as f:
+                doc = yaml.load(f, Loader=yaml.FullLoader)
 
-        if "collaborators" not in doc.keys() or not doc["collaborators"]:
-            doc["collaborators"] = []  # Create empty list
+            if "collaborators" not in doc.keys() or not doc["collaborators"]:
+                doc["collaborators"] = []  # Create empty list
 
-        for i in range(num_collaborators):
-            col_name = "collaborator" + str(i+1)
-            doc["collaborators"].append(col_name)
-            with open(self.cols_path, "w", encoding="utf-8") as f:
-                yaml.dump(doc, f)
+            for i in range(num_collaborators):
+                col_name = "collaborator" + str(i+1)
+                doc["collaborators"].append(col_name)
+                with open(self.cols_path, "w", encoding="utf-8") as f:
+                    yaml.dump(doc, f)
 
-        log.info(
-            f"Modified the plan to train the model for collaborators {self.num_collaborators} and {self.rounds_to_train} rounds"
-        )
+            log.info(
+                f"Successfully registered collaborators in {self.cols_path}"
+            )
+        except Exception as e:
+            log.error(f"Failed to register the collaborators: {e}")
+            raise e
+        return True
 
     def certify_aggregator(self, agg_domain_name):
         """
