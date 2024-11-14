@@ -390,20 +390,11 @@ def export_() -> str:
     help="If set, rebuilds docker images with `--no-cache` option.",
 )
 @option(
-    "--sgx-ready",
-    is_flag=True,
-    default=False,
-    help="If set, builds an SGX-enabled OpenFL enclave.",
-)
-@option(
     "--enclave-key",
     "enclave_key",
     type=str,
     required=False,
-    help=(
-        "Path to an enclave signing key. If not provided, a new key will be generated. "
-        "This option is only valid when `--sgx-ready` is set."
-    ),
+    help="Path to an enclave signing key. If not provided, a new key will be generated. ",
 )
 @option(
     "--revision",
@@ -417,9 +408,7 @@ def export_() -> str:
     ),
 )
 @pass_context
-def dockerize_(
-    context, save: bool, rebuild: bool, sgx_ready: bool, enclave_key: str, revision: str
-):
+def dockerize_(context, save: bool, rebuild: bool, enclave_key: str, revision: str):
     """Package current workspace as a Docker image."""
 
     # Docker build options

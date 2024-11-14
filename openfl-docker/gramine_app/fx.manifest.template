@@ -6,7 +6,7 @@
 # -------------------------------------
 
 libos.entrypoint = "{{ entrypoint }}"
-loader.entrypoint = "file:{{ gramine.libos }}"
+loader.entrypoint.uri = "file:{{ gramine.libos }}"
 loader.log_level = "{{ log_level }}"
 
 loader.insecure__use_cmdline_argv = true
