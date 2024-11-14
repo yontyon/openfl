@@ -1,8 +1,16 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-VENV_ROOT ?= /opt/venv
-WORKSPACE_ROOT ?= /workspace
+# ------------------------------------
+# Makefile for Gramine application within a container
+# Usage:
+#  1. Activate the python venv.
+#  2. Provide paths VENV_ROOT and WORKSPACE_ROOT.
+#  3. make SGX=0/1 [SGX_SIGNER_KEY=<path_to_sgx_signer_key>]
+# ------------------------------------
+VENV_ROOT ?= $(shell dirname $(shell dirname $(shell which python)))
+WORKSPACE_ROOT ?= $(shell pwd)
 ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)
+SGX_SIGNER_KEY ?= /key.pem
 
 ifeq ($(DEBUG),1)
 GRAMINE_LOG_LEVEL = debug
