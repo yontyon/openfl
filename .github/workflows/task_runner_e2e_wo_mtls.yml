@@ -28,7 +28,7 @@ env:
 
 jobs:
   test_run:
-    name: tr
+    name: tr_wo_mtls
     runs-on: ubuntu-22.04
     timeout-minutes: 120 # 2 hours
     strategy:

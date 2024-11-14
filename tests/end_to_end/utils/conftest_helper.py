@@ -29,7 +29,7 @@ def parse_arguments():
         parser.add_argument("--results_dir", type=str, required=False, default="results", help="Directory to store the results")
         parser.add_argument("--num_collaborators", type=int, default=2, help="Number of collaborators")
         parser.add_argument("--num_rounds", type=int, default=5, help="Number of rounds to train")
-        parser.add_argument("--model_name", type=str, default="torch_cnn_mnist", help="Model name")
+        parser.add_argument("--model_name", type=str, help="Model name")
         parser.add_argument("--disable_client_auth", action="store_true", help="Disable client authentication")
         parser.add_argument("--disable_tls", action="store_true", help="Disable TLS for communication")
         args = parser.parse_known_args()[0]
