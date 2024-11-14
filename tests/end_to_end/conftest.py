@@ -260,7 +260,12 @@ def fx_federation(request, pytestconfig):
 
     # Modify the plan
     try:
-        model_owner.modify_plan(new_rounds=num_rounds, num_collaborators=num_collaborators, disable_tls=disable_tls)
+        model_owner.modify_plan(
+            new_rounds=num_rounds,
+            num_collaborators=num_collaborators,
+            disable_client_auth=disable_client_auth,
+            disable_tls=disable_tls,
+        )
     except Exception as e:
         log.error(f"Failed to modify the plan: {e}")
         raise e

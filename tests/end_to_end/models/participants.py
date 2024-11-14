@@ -133,8 +133,8 @@ class ModelOwner:
 
         data["aggregator"]["settings"]["rounds_to_train"] = int(self.rounds_to_train)
         data["data_loader"]["settings"]["collaborator_count"] = int(self.num_collaborators)
-        data["network"]["settings"]["disable_client_auth"] = True if disable_client_auth else False
-        data["network"]["settings"]["tls"] = False if disable_tls else True
+        data["network"]["settings"]["disable_client_auth"] = disable_client_auth
+        data["network"]["settings"]["tls"] = not disable_tls
 
         with open(self.plan_path, "w+") as write_file:
             yaml.dump(data, write_file)

@@ -1,3 +1,4 @@
+---
 #---------------------------------------------------------------------------
 # Workflow to run Task Runner end to end tests
 # Authors - Noopur, Payal Chaurasiya
@@ -6,16 +7,16 @@ name: Task Runner E2E
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Run every day at midnight
+    - cron: "0 0 * * *" # Run every day at midnight
   workflow_dispatch:
     inputs:
       num_rounds:
-        description: 'Number of rounds to train'
+        description: "Number of rounds to train"
         required: false
         default: "5"
         type: string
       num_collaborators:
-        description: 'Number of collaborators'
+        description: "Number of collaborators"
         required: false
         default: "2"
         type: string
@@ -29,7 +30,7 @@ env:
   NUM_COLLABORATORS: ${{ inputs.num_collaborators || '2' }}
 
 jobs:
-  test_run:
+  test:
     name: tr
     runs-on: ubuntu-22.04
     timeout-minutes: 120 # 2 hours
@@ -37,8 +38,9 @@ jobs:
       matrix:
         # There are open issues for some of the models, so excluding them for now:
         # model_name: [ "torch_cnn_mnist", "keras_cnn_mnist", "torch_cnn_histology" ]
-        model_name: [ "torch_cnn_mnist", "keras_cnn_mnist" ]
-        python_version: [ "3.8", "3.9", "3.10" ]
+        model_name: ["torch_cnn_mnist", "keras_cnn_mnist"]
+        python_version: ["3.8", "3.9", "3.10"]
+        tls: [True, False]
       fail-fast: false # do not immediately fail if one of the combinations fail
 
     env:
@@ -46,50 +48,58 @@ jobs:
       PYTHON_VERSION: ${{ matrix.python_version }}
 
     steps:
-    - name: Checkout OpenFL repository
-      id: checkout_openfl
-      uses: actions/checkout@v4.1.1
-      with:
-        fetch-depth: 2 # needed for detecting changes
-        submodules: "true"
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout OpenFL repository
+        id: checkout_openfl
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2 # needed for detecting changes
+          submodules: "true"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Python
-      id: setup_python
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python
+        id: setup_python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install dependencies
-      id: install_dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install .
-        pip install -r test-requirements.txt
+      - name: Install dependencies
+        id: install_dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          pip install -r test-requirements.txt
 
-    - name: Run Task Runner E2E tests
-      id: run_task_runner_tests
-      run: |
-        python -m pytest -s tests/end_to_end/test_suites/task_runner_tests.py -m ${{ env.MODEL_NAME }} --num_rounds $NUM_ROUNDS --num_collaborators $NUM_COLLABORATORS --model_name ${{ env.MODEL_NAME }}
-        echo "Task runner end to end test run completed"
+      - name: Run Task Runner E2E tests
+        if: ${{ matrix.tls == 'true' }}
+        id: run_task_runner_tests_tls
+        run: |
+          python -m pytest -s tests/end_to_end/test_suites/task_runner_tests.py -m ${{ env.MODEL_NAME }} --num_rounds $NUM_ROUNDS --num_collaborators $NUM_COLLABORATORS --model_name ${{ env.MODEL_NAME }}
+          echo "Task runner end to end test run completed"
 
-    - name: Print test summary # Print the test summary only if the tests were run
-      id: print_test_summary
-      if: steps.run_task_runner_tests.outcome == 'success' || steps.run_task_runner_tests.outcome == 'failure'
-      run: |
-        export PYTHONPATH="$PYTHONPATH:."
-        python tests/end_to_end/utils/summary_helper.py
-        echo "Test summary printed"
+      - name: Run Task Runner E2E tests without TLS
+        if: ${{ matrix.tls == 'false' }}
+        id: run_task_runner_tests_non_tls
+        run: |
+          python -m pytest -s tests/end_to_end/test_suites/task_runner_tests.py -m ${{ env.MODEL_NAME }} --num_rounds $NUM_ROUNDS --num_collaborators $NUM_COLLABORATORS --model_name ${{ env.MODEL_NAME }} --disable_tls
+          echo "Task runner end to end test run completed"
 
-    - name: Tar files # Tar the test results only if the tests were run
-      id: tar_files
-      if: steps.run_task_runner_tests.outcome == 'success' || steps.run_task_runner_tests.outcome == 'failure'
-      run: tar -cvf result.tar results
+      - name: Print test summary # Print the test summary only if the tests were run
+        id: print_test_summary
+        if: steps.run_task_runner_tests.outcome == 'success' || steps.run_task_runner_tests.outcome == 'failure' || steps.run_task_runner_tests_non_tls.outcome == 'success' || steps.run_task_runner_tests_non_tls.outcome == 'failure'
+        run: |
+          export PYTHONPATH="$PYTHONPATH:."
+          python tests/end_to_end/utils/summary_helper.py
+          echo "Test summary printed"
 
-    - name: Upload Artifacts # Upload the test results only if the tar was created
-      id: upload_artifacts
-      uses: actions/upload-artifact@v4
-      if: steps.tar_files.outcome == 'success'
-      with:
-        name: task_runner_${{ env.MODEL_NAME }}_python${{ env.PYTHON_VERSION }}_${{ github.run_id }}
-        path: result.tar
+      - name: Tar files # Tar the test results only if the tests were run
+        id: tar_files
+        if: steps.run_task_runner_tests.outcome == 'success' || steps.run_task_runner_tests.outcome == 'failure' || steps.run_task_runner_tests_non_tls.outcome == 'success' || steps.run_task_runner_tests_non_tls.outcome == 'failure'
+        run: tar -cvf result.tar results
+
+      - name: Upload Artifacts # Upload the test results only if the tar was created
+        id: upload_artifacts
+        uses: actions/upload-artifact@v4
+        if: steps.tar_files.outcome == 'success'
+        with:
+          name: task_runner_tls_${{ matrix.tls }}_${{ env.MODEL_NAME }}_python${{ env.PYTHON_VERSION }}_${{ github.run_id }}
+          path: result.tar
