@@ -23,6 +23,7 @@ class FedProxOptimizer(keras.optimizers.Optimizer):
         learning_rate (float): The learning rate for the optimizer.
         mu (float): The proximal term coefficient.
     """
+
     def __init__(
         self,
         learning_rate=0.01,
@@ -49,13 +50,11 @@ class FedProxOptimizer(keras.optimizers.Optimizer):
         self.vstars = []
         for variable in variables:
             self.vstars.append(
-                self.add_variable_from_reference(
-                    reference_variable=variable, name="vstar"
-                )
+                self.add_variable_from_reference(reference_variable=variable, name="vstar")
             )
 
     def update_step(self, gradient, variable, learning_rate):
-        """ Update step given gradient and the associated model variable.
+        """Update step given gradient and the associated model variable.
             In the update_step method, variable is updated using the
             gradient and the proximal term (mu). The proximal term helps
             to regularize the update by considering the difference between
