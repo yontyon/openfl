@@ -56,9 +56,11 @@ class FedProxOptimizer(keras.optimizers.Optimizer):
 
     def update_step(self, gradient, variable, learning_rate):
         """ Update step given gradient and the associated model variable.
-            In the update_step method, variable is updated using the gradient and the proximal term (mu).
-            The proximal term helps to regularize the update by considering the difference between
-            the current value of variable and its initial value (vstar), which was stored during the build method.
+            In the update_step method, variable is updated using the
+            gradient and the proximal term (mu). The proximal term helps
+            to regularize the update by considering the difference between
+            the current value of variable and its initial value (vstar),
+            which was stored during the build method.
         Args:
             gradient (tf.Tensor): The gradient tensor for the variable.
             variable (tf.Variable): The model variable to be updated.
