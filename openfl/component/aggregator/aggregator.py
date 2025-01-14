@@ -472,7 +472,7 @@ class Aggregator:
         # if no tasks, tell the collaborator to sleep
         if len(tasks) == 0:
             tasks = None
-            sleep_time = self._get_sleep_time()
+            sleep_time = Aggregator._get_sleep_time()
 
             return tasks, self.round_number, sleep_time, time_to_quit
 
@@ -502,7 +502,7 @@ class Aggregator:
         # been completed
         if len(tasks) == 0:
             tasks = None
-            sleep_time = self._get_sleep_time()
+            sleep_time = Aggregator._get_sleep_time()
 
             return tasks, self.round_number, sleep_time, time_to_quit
 
