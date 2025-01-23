@@ -227,7 +227,9 @@ class AggregatorGRPCClient:
         self.root_certificate = root_certificate
         self.certificate = certificate
         self.private_key = private_key
-        self.sleeping_policy = ConstantBackoff(int(kwargs.get("client_reconnect_interval", 1)), getLogger(__name__), self.uri)
+        self.sleeping_policy = ConstantBackoff(
+            int(kwargs.get("client_reconnect_interval", 1)), getLogger(__name__), self.uri
+        )
         self.logger = getLogger(__name__)
 
         if not self.use_tls:
