@@ -151,7 +151,7 @@ def _resend_data_on_reconnection(func):
                 break
             except grpc.RpcError as e:
                 self.logger.info(
-                    f"Failed to send data request to aggregator at {self.uri}, error code {e.code()}"
+                    f"Failed to send data request to aggregator {self.uri}, error code {e.code()}"
                 )
                 if self.refetch_server_cert_callback is not None:
                     self.logger.info("Refetching server certificate")
