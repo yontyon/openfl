@@ -50,6 +50,7 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
         root_certificate=None,
         certificate=None,
         private_key=None,
+        clients_certs_refresher_cb=None,
         **kwargs,
     ):
         """
@@ -81,7 +82,7 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
         self.server_credentials = None
 
         self.logger = logging.getLogger(__name__)
-
+        self.clients_certs_refresher_cb = clients_certs_refresher_cb
     def validate_collaborator(self, request, context):
         """Validate the collaborator.
 
@@ -296,7 +297,7 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
             header=self.get_header(collaborator_name)
         )
 
-    def get_server(self, clients_certs_refresher_cb=None):
+    def get_server(self):
         """
         Return gRPC server.
 
@@ -331,10 +332,10 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
             
             def certificate_configuration_fetcher():
                 root_cert = root_certificate_b
-                self.logger.info(f"yoni1 {clients_certs_refresher_cb}")
-                if clients_certs_refresher_cb is not None:
+                self.logger.info(f"yoni1 {self.clients_certs_refresher_cb}")
+                if self.clients_certs_refresher_cb is not None:
                     self.logger.info("Reloading server credentials")
-                    root_cert = clients_certs_refresher_cb()
+                    root_cert = self.clients_certs_refresher_cb()
                 return ssl_server_certificate_configuration(((private_key_b, certificate_b),),
                 root_certificates=root_cert)
             self.server_credentials = dynamic_ssl_server_credentials(cert_config, 
@@ -344,14 +345,14 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
 
         return self.server
 
-    def serve(self, clients_certs_refresher_cb=None):
+    def serve(self):
         """Start an aggregator gRPC service.
 
         This method starts the gRPC server and handles requests until all quit
         jobs havebeen sent.
         """
-        self.logger.info(f"yoni11111111111 {clients_certs_refresher_cb}")
-        self.get_server(clients_certs_refresher_cb=clients_certs_refresher_cb)
+        self.logger.info()
+        self.get_server()
 
         self.logger.info("Starting Aggregator gRPC Server")
         self.server.start()
