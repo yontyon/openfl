@@ -10,7 +10,7 @@ from multiprocessing import cpu_count
 from random import random
 from time import sleep
 
-from grpc import StatusCode, server, ssl_server_credentials
+from grpc import StatusCode, server, dynamic_ssl_server_credentials, ssl_server_certificate_configuration
 
 from openfl.protocols import aggregator_pb2, aggregator_pb2_grpc, utils
 from openfl.transport.grpc.grpc_channel_options import channel_options
@@ -325,13 +325,13 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
 
             if not self.require_client_auth:
                 self.logger.warning("Client-side authentication is disabled.")
-
-            self.server_credentials = ssl_server_credentials(
-                ((private_key_b, certificate_b),),
-                root_certificates=root_certificate_b,
-                require_client_auth=self.require_client_auth,
-            )
-
+            cert_config = ssl_server_certificate_configuration([private_key_b, certificate_b])
+            def certificate_configuration_fetcher():
+                self.logger.info("Reloading server credentials")
+                return ssl_server_certificate_configuration([private_key_b, certificate_b])
+            self.server_credentials = dynamic_ssl_server_credentials(cert_config, 
+                                                                     certificate_configuration_fetcher, 
+                                                                     require_client_authentication=self.require_client_auth)
             self.server.add_secure_port(self.uri, self.server_credentials)
 
         return self.server
