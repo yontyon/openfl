@@ -323,12 +323,15 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
             with open(self.root_certificate, "rb") as f:
                 root_certificate_b = f.read()
 
+
             if not self.require_client_auth:
                 self.logger.warning("Client-side authentication is disabled.")
-            cert_config = ssl_server_certificate_configuration([private_key_b, certificate_b])
+            cert_config = ssl_server_certificate_configuration(((private_key_b, certificate_b),),
+                root_certificates=root_certificate_b)
             def certificate_configuration_fetcher():
                 self.logger.info("Reloading server credentials")
-                return ssl_server_certificate_configuration([private_key_b, certificate_b])
+                return ssl_server_certificate_configuration(((private_key_b, certificate_b),),
+                root_certificates=root_certificate_b)
             self.server_credentials = dynamic_ssl_server_credentials(cert_config, 
                                                                      certificate_configuration_fetcher, 
                                                                      require_client_authentication=self.require_client_auth)
