@@ -331,6 +331,7 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
             
             def certificate_configuration_fetcher():
                 root_cert = root_certificate_b
+                self.logger.info(f"yoni1 {clients_certs_refresher_cb}")
                 if clients_certs_refresher_cb is not None:
                     self.logger.info("Reloading server credentials")
                     root_cert = clients_certs_refresher_cb()
