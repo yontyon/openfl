@@ -10,12 +10,9 @@ from multiprocessing import cpu_count
 from random import random
 from time import sleep
 
-from grpc import (
-    StatusCode,
-    server,
-    dynamic_ssl_server_credentials,
-    ssl_server_certificate_configuration,
-)
+from grpc import StatusCode, server
+from grpc import dynamic_ssl_server_credentials
+from grpc import ssl_server_certificate_configuration
 
 from openfl.protocols import aggregator_pb2, aggregator_pb2_grpc, utils
 from openfl.transport.grpc.grpc_channel_options import channel_options
