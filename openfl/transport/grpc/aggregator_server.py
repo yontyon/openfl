@@ -351,7 +351,6 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
         This method starts the gRPC server and handles requests until all quit
         jobs havebeen sent.
         """
-        self.logger.info()
         self.get_server()
 
         self.logger.info("Starting Aggregator gRPC Server")
