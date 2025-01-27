@@ -296,7 +296,7 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
             header=self.get_header(collaborator_name)
         )
 
-    def get_server(self):
+    def get_server(self, clients_certs_refresher_cb=None):
         """
         Return gRPC server.
 
@@ -328,8 +328,11 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
                 self.logger.warning("Client-side authentication is disabled.")
             cert_config = ssl_server_certificate_configuration(((private_key_b, certificate_b),),
                 root_certificates=root_certificate_b)
+            
             def certificate_configuration_fetcher():
-                self.logger.info("Reloading server credentials")
+                if clients_certs_refresher_cb is not None:
+                    self.logger.info("Reloading server credentials")
+                    root_certificate_b = clients_certs_refresher_cb()
                 return ssl_server_certificate_configuration(((private_key_b, certificate_b),),
                 root_certificates=root_certificate_b)
             self.server_credentials = dynamic_ssl_server_credentials(cert_config, 
@@ -339,13 +342,13 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
 
         return self.server
 
-    def serve(self):
+    def serve(self, clients_certs_refresher_cb=None):
         """Start an aggregator gRPC service.
 
         This method starts the gRPC server and handles requests until all quit
         jobs havebeen sent.
         """
-        self.get_server()
+        self.get_server(clients_certs_refresher_cb)
 
         self.logger.info("Starting Aggregator gRPC Server")
         self.server.start()
