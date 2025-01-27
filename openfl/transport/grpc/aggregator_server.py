@@ -330,11 +330,12 @@ class AggregatorGRPCServer(aggregator_pb2_grpc.AggregatorServicer):
                 root_certificates=root_certificate_b)
             
             def certificate_configuration_fetcher():
+                root_cert = root_certificate_b
                 if clients_certs_refresher_cb is not None:
                     self.logger.info("Reloading server credentials")
-                    root_certificate_b = clients_certs_refresher_cb()
+                    root_cert = clients_certs_refresher_cb()
                 return ssl_server_certificate_configuration(((private_key_b, certificate_b),),
-                root_certificates=root_certificate_b)
+                root_certificates=root_cert)
             self.server_credentials = dynamic_ssl_server_credentials(cert_config, 
                                                                      certificate_configuration_fetcher, 
                                                                      require_client_authentication=self.require_client_auth)
